@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>纯 Unicode 快闪</title>
+  <style>
+    /* 暴力清除所有边距，禁止滚动和缩放 */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background-color: #000; }
+    
+    /* 整个屏幕就是一个字体 */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Plangothic P1', 'Plangothic P2', 'Segoe UI', system-ui, sans-serif;
+      color: #fff;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      cursor: pointer;
+    }
+
+    /* 那个巨大无比的字 */
+    #glyph {
+      font-size: 40vw; /* 直接占据屏幕宽度的40%，有多大整多大 */
+      font-weight: normal;
+      line-height: 1;
+      text-align: center;
+      /* 加点微弱的荧光效果，看起来更魔性 */
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      transition: transform 0.05s; /* 加一点点缩放微动效果 */
+    }
+  </style>
+</head>
+<body>
+
+  <div id="glyph">𠀀</div>
+
+  <script>
+    (function() {
+      const glyphEl = document.getElementById('glyph');
+      
+      // 设定你要快闪的 Unicode 范围（这里依旧用你之前的 0x20000 到 0x33479）
+      const START_CODE = 0x20000;
+      const END_CODE = 0x33479;
+      const TOTAL_SPAN = END_CODE - START_CODE + 1;
+      
+      let currentCode = START_CODE;
+      let rafId = null;
+
+      // 核心渲染循环：用 requestAnimationFrame 保证满帧率运行
+      function loop() {
+        // 生成当前码位的字符
+        const char = String.fromCodePoint(currentCode);
+        glyphEl.textContent = char;
+
+        // 码位自增，如果超出范围就循环回起点
+        currentCode++;
+        if (currentCode > END_CODE) {
+          currentCode = START_CODE;
+        }
+
+        // 继续下一帧
+        rafId = requestAnimationFrame(loop);
+      }
+
+      // 启动！
+      loop();
+
+      // 彩蛋：点击屏幕暂停/继续（这样你就可以随时截图了）
+      document.body.addEventListener('click', () => {
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        } else {
+          loop();
+        }
+      });
+
+    })();
+  </script>
+</body>
+</html>
